@@ -1,0 +1,6 @@
+[submodule "QuickLook.Common"]
+	path = QuickLook.Common
+	url = https://github.com/QL-Win/QuickLook.Common
+[submodule "QuickLook.LottieFiles/LottieSharp"]
+	path = QuickLook.LottieFiles/LottieSharp
+	url = https://github.com/quicoli/LottieSharp
