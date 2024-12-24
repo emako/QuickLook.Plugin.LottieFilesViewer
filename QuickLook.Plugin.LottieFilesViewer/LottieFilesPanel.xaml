@@ -9,14 +9,42 @@
              mc:Ignorable="d">
     <Grid>
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-            <lottie:LottieAnimationView Width="1000"
-                                        Height="500"
+            <lottie:LottieAnimationView x:Name="lottieView"
+                                        Width="{Binding ViewerWidth}"
+                                        Height="{Binding ViewerHeight}"
                                         HorizontalAlignment="Center"
                                         VerticalAlignment="Center"
                                         AutoPlay="True"
                                         FileName="{Binding FileName}"
                                         JsonContent="{Binding JsonContent}"
-                                        RepeatCount="-1" />
+                                        RepeatCount="-1">
+                <lottie:LottieAnimationView.RenderTransform>
+                    <ScaleTransform CenterX="{Binding CenterX}" CenterY="{Binding CenterY}" ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}" />
+                </lottie:LottieAnimationView.RenderTransform>
+            </lottie:LottieAnimationView>
+            <Border x:Name="zoomLevelInfo"
+                    Padding="15,4,15,4"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Background="Gray"
+                    CornerRadius="5"
+                    IsHitTestVisible="False"
+                    Opacity="0">
+                <TextBlock FontSize="18"
+                           Foreground="White"
+                           Text="{Binding Scaling}" />
+                <Border.Resources>
+                    <Storyboard x:Key="StoryboardShowZoomLevelInfo">
+                        <DoubleAnimationUsingKeyFrames Storyboard.Target="{Binding Source={x:Reference zoomLevelInfo}}" Storyboard.TargetProperty="Opacity">
+                            <DoubleAnimationUsingKeyFrames.KeyFrames>
+                                <LinearDoubleKeyFrame KeyTime="0:0:0.1" Value="0.9" />
+                                <LinearDoubleKeyFrame KeyTime="0:0:0.6" Value="0.9" />
+                                <LinearDoubleKeyFrame KeyTime="0:0:0.8" Value="0" />
+                            </DoubleAnimationUsingKeyFrames.KeyFrames>
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
+                </Border.Resources>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>
