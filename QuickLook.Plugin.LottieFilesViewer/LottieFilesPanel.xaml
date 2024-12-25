@@ -4,47 +4,100 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:lottie="clr-namespace:QuickLook.Plugin.LottieFilesViewer.LottieSharp"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:plugin="clr-namespace:QuickLook.Common.Plugin;assembly=QuickLook.Common"
              d:DesignHeight="450"
              d:DesignWidth="800"
              mc:Ignorable="d">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!--  only for design  -->
+                <ResourceDictionary Source="/QuickLook.Common;component/Styles/MainWindowStyles.xaml" />
+                <ResourceDictionary Source="/QuickLook.Common;component/Styles/MainWindowStyles.Dark.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
     <Grid>
-        <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-            <lottie:LottieAnimationView x:Name="lottieView"
-                                        Width="{Binding ViewerWidth}"
-                                        Height="{Binding ViewerHeight}"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        AutoPlay="True"
-                                        FileName="{Binding FileName}"
-                                        JsonContent="{Binding JsonContent}"
-                                        RepeatCount="-1">
-                <lottie:LottieAnimationView.RenderTransform>
-                    <ScaleTransform CenterX="{Binding CenterX}" CenterY="{Binding CenterY}" ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}" />
-                </lottie:LottieAnimationView.RenderTransform>
-            </lottie:LottieAnimationView>
-            <Border x:Name="zoomLevelInfo"
-                    Padding="15,4,15,4"
-                    HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Background="Gray"
-                    CornerRadius="5"
-                    IsHitTestVisible="False"
-                    Opacity="0">
-                <TextBlock FontSize="18"
-                           Foreground="White"
-                           Text="{Binding Scaling}" />
-                <Border.Resources>
-                    <Storyboard x:Key="StoryboardShowZoomLevelInfo">
-                        <DoubleAnimationUsingKeyFrames Storyboard.Target="{Binding Source={x:Reference zoomLevelInfo}}" Storyboard.TargetProperty="Opacity">
-                            <DoubleAnimationUsingKeyFrames.KeyFrames>
-                                <LinearDoubleKeyFrame KeyTime="0:0:0.1" Value="0.9" />
-                                <LinearDoubleKeyFrame KeyTime="0:0:0.6" Value="0.9" />
-                                <LinearDoubleKeyFrame KeyTime="0:0:0.8" Value="0" />
-                            </DoubleAnimationUsingKeyFrames.KeyFrames>
-                        </DoubleAnimationUsingKeyFrames>
-                    </Storyboard>
-                </Border.Resources>
-            </Border>
-        </Grid>
+        <Rectangle RenderOptions.BitmapScalingMode="NearestNeighbor">
+            <Rectangle.Style>
+                <Style>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding Theme}" Value="{x:Static plugin:Themes.Dark}">
+                            <Setter Property="Rectangle.Fill">
+                                <Setter.Value>
+                                    <ImageBrush AlignmentY="Top"
+                                                ImageSource="Resources/background-b.png"
+                                                RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                                Stretch="UniformToFill"
+                                                TileMode="Tile"
+                                                Viewport="0,0,32,32"
+                                                ViewportUnits="Absolute" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding Theme}" Value="{x:Static plugin:Themes.Light}">
+                            <Setter Property="Rectangle.Fill">
+                                <Setter.Value>
+                                    <ImageBrush AlignmentY="Top"
+                                                ImageSource="Resources/background.png"
+                                                RenderOptions.BitmapScalingMode="NearestNeighbor"
+                                                Stretch="UniformToFill"
+                                                TileMode="Tile"
+                                                Viewport="0,0,32,32"
+                                                ViewportUnits="Absolute" />
+                                </Setter.Value>
+                            </Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Rectangle.Style>
+        </Rectangle>
+        <lottie:LottieAnimationView x:Name="lottieView"
+                                    Width="{Binding ViewerWidth}"
+                                    Height="{Binding ViewerHeight}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    AutoPlay="True"
+                                    FileName="{Binding FileName}"
+                                    JsonContent="{Binding JsonContent}"
+                                    RepeatCount="-1">
+            <!--<lottie:LottieAnimationView.RenderTransform>
+                <ScaleTransform CenterX="{Binding CenterX}" CenterY="{Binding CenterY}" ScaleX="{Binding ScaleX}" ScaleY="{Binding ScaleY}" />
+            </lottie:LottieAnimationView.RenderTransform>-->
+        </lottie:LottieAnimationView>
+        <Border x:Name="zoomLevelInfo"
+                Padding="15,4,15,4"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Background="Gray"
+                CornerRadius="5"
+                IsHitTestVisible="False"
+                Opacity="0">
+            <TextBlock FontSize="18"
+                       Foreground="White"
+                       Text="{Binding Scaling, StringFormat={}{0:P0}}" />
+            <Border.Resources>
+                <Storyboard x:Key="StoryboardShowZoomLevelInfo">
+                    <DoubleAnimationUsingKeyFrames Storyboard.Target="{Binding Source={x:Reference zoomLevelInfo}}" Storyboard.TargetProperty="Opacity">
+                        <DoubleAnimationUsingKeyFrames.KeyFrames>
+                            <LinearDoubleKeyFrame KeyTime="0:0:0.1" Value="0.9" />
+                            <LinearDoubleKeyFrame KeyTime="0:0:0.6" Value="0.9" />
+                            <LinearDoubleKeyFrame KeyTime="0:0:0.8" Value="0" />
+                        </DoubleAnimationUsingKeyFrames.KeyFrames>
+                    </DoubleAnimationUsingKeyFrames>
+                </Storyboard>
+            </Border.Resources>
+        </Border>
+        <StackPanel Margin="0,8,0,0"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Top"
+                    Orientation="Horizontal">
+            <Button x:Name="buttonBackgroundColour"
+                    Width="24"
+                    Height="24"
+                    Margin="0,0,8,0"
+                    Content="&#xEF1F;"
+                    Style="{StaticResource CaptionButtonStyle}" />
+        </StackPanel>
     </Grid>
 </UserControl>

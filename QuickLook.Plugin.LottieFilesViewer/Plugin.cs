@@ -15,6 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+using QuickLook.Common.Helpers;
 using QuickLook.Common.Plugin;
 using QuickLook.Plugin.LottieFilesViewer.TinyJson;
 using System;
@@ -184,14 +185,22 @@ public class Plugin : IViewer
 
     public void View(string path, ContextObject context)
     {
-        _panel = new LottieFilesPanel();
+        var size = context.PreferredSize;
+
+        context.Theme = (Themes)SettingHelper.Get("LastTheme", 1, "QuickLook.Plugin.ImageViewer");
+
+        _panel = new LottieFilesPanel(context)
+        {
+            OriginalWidth = size.Width,
+            OriginalHeight = size.Height,
+            ViewerWidth = size.Width,
+            ViewerHeight = size.Height,
+        };
 
         if (!string.IsNullOrWhiteSpace(_jsonContent))
             _panel.JsonContent = _jsonContent;
         else
             _panel.FileName = path;
-
-        var size = context.PreferredSize;
 
         context.ViewerContent = _panel;
         context.Title = size.IsEmpty

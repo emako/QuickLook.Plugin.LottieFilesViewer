@@ -100,4 +100,9 @@
 		<Compile Remove="TinyJson\JSONWriter.cs" />
 	</ItemGroup>
 
+    <ItemGroup>
+        <Resource Include="Resources\background-b.png" />
+        <Resource Include="Resources\background.png" />
+    </ItemGroup>
+
 </Project>

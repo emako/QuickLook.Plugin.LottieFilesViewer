@@ -16,20 +16,49 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 using QuickLook.Common.Annotations;
+using QuickLook.Common.Helpers;
+using QuickLook.Common.Plugin;
+using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 
 namespace QuickLook.Plugin.LottieFilesViewer;
 
 public partial class LottieFilesPanel : UserControl, INotifyPropertyChanged
 {
-    private const double ZoomFactor = 0.1d;
-    private const double MinScale = 0.05d;
-    private const double MaxScale = 5d;
+    private const double zoomFactor = 0.1d;
+    private const double minScale = 0.05d;
+    private const double maxScale = 5d;
+    private DispatcherTimer _timer = new();
+
+    private ContextObject _contextObject = null!;
+
+    public ContextObject ContextObject
+    {
+        get => _contextObject;
+        set
+        {
+            _contextObject = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public Themes Theme
+    {
+        get => ContextObject?.Theme ?? Themes.Dark;
+        set
+        {
+            ContextObject.Theme = value;
+            OnPropertyChanged();
+        }
+    }
 
     private string _fileName = null!;
 
@@ -56,6 +85,9 @@ public partial class LottieFilesPanel : UserControl, INotifyPropertyChanged
             OnPropertyChanged();
         }
     }
+
+    public double OriginalWidth = 500d;
+    public double OriginalHeight = 500d;
 
     private double _viewerWidth = 500d;
 
@@ -99,6 +131,7 @@ public partial class LottieFilesPanel : UserControl, INotifyPropertyChanged
             if (value == _scaleX) return;
             _scaleX = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(Scaling));
         }
     }
 
@@ -112,12 +145,13 @@ public partial class LottieFilesPanel : UserControl, INotifyPropertyChanged
             if (value == _scaleY) return;
             _scaleY = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(Scaling));
         }
     }
 
-    private string _scaling = "100%";
+    private double _scaling = 1d;
 
-    public string Scaling
+    public double Scaling
     {
         get => _scaling;
         set
@@ -125,8 +159,6 @@ public partial class LottieFilesPanel : UserControl, INotifyPropertyChanged
             if (value == _scaling) return;
             _scaling = value;
             OnPropertyChanged();
-            if (ShowZoomLevelInfo)
-                ((Storyboard)zoomLevelInfo.FindResource("StoryboardShowZoomLevelInfo")).Begin();
         }
     }
 
@@ -143,39 +175,91 @@ public partial class LottieFilesPanel : UserControl, INotifyPropertyChanged
         }
     }
 
-    public LottieFilesPanel()
+    public LottieFilesPanel(ContextObject context)
     {
+        ContextObject = context;
+        Theme = ContextObject.Theme;
         DataContext = this;
         InitializeComponent();
+
+        buttonBackgroundColour.Click += OnBackgroundColourOnClick;
+
         Loaded += LottieFilesPanel_Loaded;
+
+        _timer.Interval = TimeSpan.FromMilliseconds(5);
+        _timer.Tick += Timer_Tick;
+    }
+
+    private void OnBackgroundColourOnClick(object sender, RoutedEventArgs e)
+    {
+        Theme = Theme == Themes.Dark ? Themes.Light : Themes.Dark;
+
+        SettingHelper.Set("LastTheme", (int)Theme, "QuickLook.Plugin.ImageViewer");
     }
 
     private void LottieFilesPanel_Loaded(object sender, RoutedEventArgs e)
     {
+        Loaded -= LottieFilesPanel_Loaded;
+
         if (Window.GetWindow(this) is Window window)
         {
-            window.MouseWheel += LottieFilesPanel_MouseWheel;
-            window.Unloaded += LottieFilesPanel_Unloaded;
+            window.MouseWheel += Window_MouseWheel;
+            window.Unloaded += Window_Unloaded;
         }
     }
 
-    private void LottieFilesPanel_Unloaded(object sender, RoutedEventArgs e)
+    private void Window_Unloaded(object sender, RoutedEventArgs e)
     {
         if (Window.GetWindow(this) is Window window)
         {
-            window.MouseWheel -= LottieFilesPanel_MouseWheel;
-            window.Unloaded -= LottieFilesPanel_Unloaded;
+            window.MouseWheel -= Window_MouseWheel;
+            window.Unloaded -= Window_Unloaded;
+            _timer.Stop();
         }
     }
 
-    private void LottieFilesPanel_MouseWheel(object sender, MouseWheelEventArgs e)
+    private void Window_MouseWheel(object sender, MouseWheelEventArgs e)
     {
-        double delta = e.Delta > 0 ? ZoomFactor : -ZoomFactor;
+        Debug.WriteLine($"LottieFilesPanel_MouseWheel_Before:ScaleX={ScaleX}|ScaleY={ScaleY}|Scaling={Scaling}|ViewerWidth={ViewerWidth}|ViewerHeight={ViewerHeight}|ViewerWidth / OriginalWidth={ViewerWidth / OriginalWidth}");
 
-        ScaleX = Math2.Clamp(ScaleX + delta, MinScale, MaxScale);
-        ScaleY = Math2.Clamp(ScaleY + delta, MinScale, MaxScale);
+        double delta = e.Delta > 0 ? zoomFactor : -zoomFactor;
 
-        Scaling = $"{(int)(ScaleX * 100d)}%";
+        // Blur zoom
+        ScaleX = Math2.Clamp(Scaling + delta, minScale, maxScale);
+        ScaleY = Math2.Clamp(Scaling + delta, minScale, maxScale);
+
+        Scaling = ScaleX;
+
+        Debug.WriteLine($"LottieFilesPanel_MouseWheel_After:ScaleX={ScaleX}|ScaleY={ScaleY}|Scaling={Scaling}|ViewerWidth={ViewerWidth}|ViewerHeight={ViewerHeight}|ViewerWidth / OriginalWidth={ViewerWidth / OriginalWidth}");
+
+        if (ShowZoomLevelInfo)
+        {
+            if (zoomLevelInfo.FindResource("StoryboardShowZoomLevelInfo") is Storyboard storyboard)
+            {
+                storyboard.Begin();
+            }
+        }
+
+        _timer.Stop();
+        _timer.Start();
+    }
+
+    private void Timer_Tick(object sender, EventArgs e)
+    {
+        Debug.WriteLine($"LottieFilesPanel_TimerTick_Before:ScaleX={ScaleX}|ScaleY={ScaleY}|Scaling={Scaling}|ViewerWidth={ViewerWidth}|ViewerHeight={ViewerHeight}|ViewerWidth / OriginalWidth={ViewerWidth / OriginalWidth}");
+
+        _timer.Stop();
+
+        // Apply zoom
+        ViewerWidth = ScaleX * OriginalWidth;
+        ViewerHeight = ScaleY * OriginalHeight;
+
+        ScaleX = 1d;
+        ScaleY = 1d;
+
+        Scaling = Math2.Clamp(ViewerWidth / OriginalWidth, minScale, maxScale);
+
+        Debug.WriteLine($"LottieFilesPanel_TimerTick_After:ScaleX={ScaleX}|ScaleY={ScaleY}|Scaling={Scaling}|ViewerWidth={ViewerWidth}|ViewerHeight={ViewerHeight}|ViewerWidth / OriginalWidth={ViewerWidth / OriginalWidth}");
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
