@@ -92,6 +92,14 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Top"
                     Orientation="Horizontal">
+
+            <Button x:Name="buttonMeta"
+                    Width="24"
+                    Height="24"
+                    Margin="0,0,8,0"
+                    Content="&#xE946;"
+                    Style="{StaticResource CaptionButtonStyle}" />
+
             <Button x:Name="buttonBackgroundColour"
                     Width="24"
                     Height="24"
@@ -99,5 +107,32 @@
                     Content="&#xEF1F;"
                     Style="{StaticResource CaptionButtonStyle}" />
         </StackPanel>
+        <TextBlock x:Name="textMeta"
+                   Margin="0,40,8,0"
+                   Padding="5,5,5,5"
+                   HorizontalAlignment="Right"
+                   VerticalAlignment="Top"
+                   Background="{DynamicResource CaptionBackground}"
+                   FontSize="11"
+                   Foreground="{DynamicResource WindowTextForeground}"
+                   IsHitTestVisible="False">
+            <TextBlock.Inlines>
+                <Run FontWeight="SemiBold">Version</Run>
+                <Run>:&#160;</Run>
+                <Run>x.x.x</Run>
+            </TextBlock.Inlines>
+            <TextBlock.Style>
+                <Style>
+                    <Style.Setters>
+                        <Setter Property="TextBlock.Visibility" Value="Collapsed" />
+                    </Style.Setters>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ElementName=buttonMeta, Path=IsMouseOver}" Value="True">
+                            <Setter Property="TextBlock.Visibility" Value="Visible" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
     </Grid>
 </UserControl>
