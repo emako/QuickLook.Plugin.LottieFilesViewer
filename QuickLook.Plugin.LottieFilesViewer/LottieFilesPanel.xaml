@@ -115,12 +115,8 @@
                    Background="{DynamicResource CaptionBackground}"
                    FontSize="11"
                    Foreground="{DynamicResource WindowTextForeground}"
-                   IsHitTestVisible="False">
-            <TextBlock.Inlines>
-                <Run FontWeight="SemiBold">Version</Run>
-                <Run>:&#160;</Run>
-                <Run>x.x.x</Run>
-            </TextBlock.Inlines>
+                   IsHitTestVisible="False"
+                   Text="{Binding Meta}">
             <TextBlock.Style>
                 <Style>
                     <Style.Setters>

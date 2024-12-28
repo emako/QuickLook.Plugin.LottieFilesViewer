@@ -24,7 +24,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
@@ -70,6 +69,15 @@ public partial class LottieFilesPanel : UserControl, INotifyPropertyChanged
             if (value == _fileName) return;
             _fileName = value;
             OnPropertyChanged();
+
+            Meta =
+                $"""
+                Version: {lottieView.Info.Version}
+                Duration: {lottieView.Info.Duration}
+                Fps: {lottieView.Info.Fps}
+                InPoint: {lottieView.Info.InPoint}
+                OutPoint: {lottieView.Info.OutPoint}
+                """;
         }
     }
 
@@ -82,6 +90,28 @@ public partial class LottieFilesPanel : UserControl, INotifyPropertyChanged
         {
             if (value == _jsonContent) return;
             _jsonContent = value;
+            OnPropertyChanged();
+
+            Meta =
+                $"""
+                Version: {lottieView.Info.Version}
+                Duration: {lottieView.Info.Duration}
+                Fps: {lottieView.Info.Fps}
+                InPoint: {lottieView.Info.InPoint}
+                OutPoint: {lottieView.Info.OutPoint}
+                """;
+        }
+    }
+
+    private string _meta = string.Empty;
+
+    public string Meta
+    {
+        get => _meta;
+        set
+        {
+            if (value == _meta) return;
+            _meta = value;
             OnPropertyChanged();
         }
     }
@@ -250,6 +280,7 @@ public partial class LottieFilesPanel : UserControl, INotifyPropertyChanged
 
         _timer.Stop();
 
+        // TODO: lottieView.AnimationScale?
         // Apply zoom
         ViewerWidth = ScaleX * OriginalWidth;
         ViewerHeight = ScaleY * OriginalHeight;
