@@ -287,11 +287,6 @@ __pycache__/
 *.odx.cs
 *.xsd.cs
 
-/QuickLook.Plugin.PDFViewer/MoonPdfLib
+/QuickLook.Plugin.Metadata.config
 /GitVersion.cs
-/QuickLook.Installer/C_QuickLookComponents.wxs
 /Build/*
-!/Build/Assets
-!/Build/AppxManifest.*
-!/Build/assetslayout.resfiles
-!/Build/priconfig.xml

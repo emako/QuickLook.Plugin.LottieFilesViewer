@@ -33,6 +33,7 @@ public class Plugin : IViewer
 {
     private LottieFilesPanel? _panel;
     private string _jsonContent = null!;
+    private Size _size = Size.Empty;
 
     public int Priority => 2;
 
@@ -91,7 +92,8 @@ public class Plugin : IViewer
                  && double.TryParse(json["w"].ToString(), out double width)
                  && double.TryParse(json["h"].ToString(), out double height))
                 {
-                    context.PreferredSize = new Size(width, height);
+                    _size = new Size(width, height);
+                    context.SetPreferredSizeFit(_size, 0.9d);
                 }
             }
         }
@@ -173,7 +175,8 @@ public class Plugin : IViewer
                                  && double.TryParse(json["w"].ToString(), out double width)
                                  && double.TryParse(json["h"].ToString(), out double height))
                                 {
-                                    context.PreferredSize = new Size(width, height);
+                                    _size = new Size(width, height);
+                                    context.SetPreferredSizeFit(_size, 0.9d);
                                 }
                             }
                         }
@@ -191,8 +194,8 @@ public class Plugin : IViewer
 
         _panel = new LottieFilesPanel(context)
         {
-            OriginalWidth = size.Width,
-            OriginalHeight = size.Height,
+            OriginalWidth = _size.Width,
+            OriginalHeight = _size.Height,
             ViewerWidth = size.Width,
             ViewerHeight = size.Height,
         };
@@ -203,9 +206,9 @@ public class Plugin : IViewer
             _panel.FileName = path;
 
         context.ViewerContent = _panel;
-        context.Title = size.IsEmpty
+        context.Title = _size.IsEmpty
             ? $"{Path.GetFileName(path)}"
-            : $"{size.Width}×{size.Height}: {Path.GetFileName(path)}";
+            : $"{_size.Width}×{_size.Height}: {Path.GetFileName(path)}";
 
         _panel.Dispatcher.Invoke(() => { context.IsBusy = false; }, DispatcherPriority.Loaded);
     }
